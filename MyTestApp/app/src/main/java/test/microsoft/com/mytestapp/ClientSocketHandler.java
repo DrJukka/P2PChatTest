@@ -21,7 +21,6 @@ public class ClientSocketHandler extends Thread {
     private ChatManager chat;
     private InetAddress mAddress;
     private int mPort;
-    private OutputStream oStream;
 
     public ClientSocketHandler(Handler handler, InetAddress groupOwnerAddress, int port,Context context) {
         this.broadcaster = LocalBroadcastManager.getInstance(context);

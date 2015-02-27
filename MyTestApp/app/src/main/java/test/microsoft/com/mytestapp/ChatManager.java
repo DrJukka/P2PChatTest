@@ -33,7 +33,7 @@ public class ChatManager implements Runnable {
 
             iStream = socket.getInputStream();
             oStream = socket.getOutputStream();
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[1048576]; //Megabyte buffer
             int bytes;
             handler.obtainMessage(MainActivity.MY_HANDLE, this).sendToTarget();
 

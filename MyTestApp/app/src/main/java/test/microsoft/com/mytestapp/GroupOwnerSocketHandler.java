@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,11 +24,9 @@ public class GroupOwnerSocketHandler extends Thread {
 
     LocalBroadcastManager broadcaster;
     ServerSocket socket = null;
-    private final int THREAD_COUNT = 10;
     private Handler handler;
     private static final String TAG = "GroupOwnerSocketHandler";
-    private InputStream iStream;
-    byte[] buffer = new byte[1024];
+    private ChatManager chat;
 
     public GroupOwnerSocketHandler(Handler handler, int port,Context context) throws IOException {
         try {
@@ -37,7 +36,6 @@ public class GroupOwnerSocketHandler extends Thread {
             Log.d("GroupOwnerSocketHandler", "Socket Started");
         } catch (IOException e) {
             e.printStackTrace();
-            pool.shutdownNow();
             throw e;
         }
 
@@ -45,20 +43,22 @@ public class GroupOwnerSocketHandler extends Thread {
 
     /**
      * A ThreadPool for client sockets.
-     */
+
     private final ThreadPoolExecutor pool = new ThreadPoolExecutor(
             THREAD_COUNT, THREAD_COUNT, 10, TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>());
 
-
+     */
     @Override
     public void run() {
         while (true) {
             try {
                 // A blocking operation. Initiate a ChatManager instance when
                 // there is a new connection
-                pool.execute(new ChatManager(socket.accept(), handler));
-                Log.d(TAG, "Launching the I/O handler");
+                Socket  s = socket.accept();
+                Log.d(TAG, "Launching the Group I/O handler");
+                chat = new ChatManager(s, handler);
+                new Thread(chat).start();
 
             } catch (IOException e) {
                 try {
@@ -68,10 +68,14 @@ public class GroupOwnerSocketHandler extends Thread {
 
                 }
                 e.printStackTrace();
-                pool.shutdownNow();
+
                 break;
             }
         }
+    }
+
+    public ChatManager getChat() {
+        return chat;
     }
 
 }
